@@ -22,3 +22,8 @@ class GeneRIFS:
             cache.parent.mkdir(exist_ok=True)
             df.to_parquet(cache)
         return df
+
+    def get_texts_by_gene_id(self, gene_id: int) -> Sequence[str]:
+        """Get all the texts for the given gene IDs."""
+        mask = (self.df["#Tax ID"] == 9606) & (self.df["Gene ID"] == gene_id)
+        return self.df[mask]["GeneRIF text"].tolist()
