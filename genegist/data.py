@@ -1,6 +1,8 @@
+import os
 from pathlib import Path
 from typing import Sequence
 
+from Bio import Entrez
 import pandas as pd
 
 
@@ -27,3 +29,23 @@ class GeneRIFS:
         """Get all the texts for the given gene IDs."""
         mask = (self.df["#Tax ID"] == 9606) & (self.df["Gene ID"] == gene_id)
         return self.df[mask]["GeneRIF text"].tolist()
+
+
+def gene2id(gene_name: str) -> int:
+    if os.environ.get("NCBI_EMAIL"):
+        Entrez.email = os.environ["NCBI_EMAIL"]
+    else:
+        raise ValueError("Please set the NCBI_EMAIL environment variable.")
+    handle = Entrez.esearch(
+        db="gene", term=f"{gene_name}[Gene Name] AND Homo sapiens[Organism]"
+    )
+    record = Entrez.read(handle)
+    handle.close()
+
+    # Check if there are any results
+    if not record["IdList"]:
+        return None
+
+    gene_id = record["IdList"][0]
+
+    return int(gene_id)
