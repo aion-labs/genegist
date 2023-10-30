@@ -16,6 +16,8 @@ tiktoken = "^0.4"
 fastapi = "^0.95"
 python-multipart = "^0.0"
 paper-qa = "^3.7.0"
+pyarrow = "^13.0.0" 
+biopython = "^1.81"
 
 [tool.poetry.dev-dependencies]
 pytest = "^7.4.0"
@@ -23,6 +25,9 @@ pytest-asyncio = "^0.21.1"
 
 [tool.poetry.scripts]
 genegist = "genegist:__main__.main"
+
+[tool.poetry.group.dev.dependencies]
+ipykernel = "^6.26.0"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
