@@ -1,18 +1,24 @@
 from pathlib import Path
+from typing import Sequence
+
 import pandas as pd
 
 
-def get_generifs() -> pd.DataFrame:
-    url = "https://ftp.ncbi.nlm.nih.gov/gene/GeneRIF/generifs_basic.gz"
-    cache = Path(__file__).parent / "data" / "generifs_basic.parquet"
-    if cache.exists():
-        df = pd.read_parquet(cache)
-    else:
-        df = pd.read_csv(url, compression="gzip", sep="\t", lineterminator="\n")
+class GeneRIFS:
+    def __init__(self):
+        self.df = self.get_generifs()
 
-        # Ensure that the 'PubMed ID (PMID) list' column is treated as a string
-        df["PubMed ID (PMID) list"] = df["PubMed ID (PMID) list"].astype(str)
+    def get_generifs(self) -> pd.DataFrame:
+        url = "https://ftp.ncbi.nlm.nih.gov/gene/GeneRIF/generifs_basic.gz"
+        cache = Path(__file__).parent / "data" / "generifs_basic.parquet"
+        if cache.exists():
+            df = pd.read_parquet(cache)
+        else:
+            df = pd.read_csv(url, compression="gzip", sep="\t", lineterminator="\n")
 
-        cache.parent.mkdir(exist_ok=True)
-        df.to_parquet(cache)
-    return df
+            # Ensure that the 'PubMed ID (PMID) list' column is treated as a string
+            df["PubMed ID (PMID) list"] = df["PubMed ID (PMID) list"].astype(str)
+
+            cache.parent.mkdir(exist_ok=True)
+            df.to_parquet(cache)
+        return df
