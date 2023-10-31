@@ -1,3 +1,4 @@
+import json
 import os
 from pathlib import Path
 from typing import Sequence
@@ -49,3 +50,14 @@ def gene2id(gene_name: str) -> int:
     gene_id = record["IdList"][0]
 
     return int(gene_id)
+
+
+def geneset2symbols(geneset: str) -> Sequence[str]:
+    hallmarks_path = Path(__file__).parent / "data" / "h.all.v2023.2.Hs.json.txt"
+    if not hallmarks_path.exists():
+        raise ValueError(
+            "Download the hallmarks genesets json from: https://www.gsea-msigdb.org/gsea/msigdb/human/collections.jsp"
+        )
+    with open(hallmarks_path) as fd:
+        hallmarks = json.load(fd)
+    return hallmarks[geneset]["geneSymbols"]
