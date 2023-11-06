@@ -67,6 +67,29 @@ def gene2id(gene_name: str) -> int:
     return int(gene_id)
 
 
+def get_gene_abstracts(gene_name: str, max_results: int = 100) -> str:
+    if os.environ.get("NCBI_EMAIL"):
+        Entrez.email = os.environ["NCBI_EMAIL"]
+    else:
+        raise ValueError("Please set the NCBI_EMAIL environment variable.")
+    search_term = f"{gene_name}[Gene Name] AND Homo sapiens[Organism]"
+    search_handle = Entrez.esearch(db="pubmed", term=search_term, retmax=max_results)
+    search_results = Entrez.read(search_handle)
+    search_handle.close()
+
+    id_list = search_results["IdList"]
+
+    if id_list:
+        fetch_handle = Entrez.efetch(
+            db="pubmed", id=id_list, rettype="abstract", retmode="text"
+        )
+        abstracts = fetch_handle.read()
+        fetch_handle.close()
+        return abstracts
+    else:
+        return "No results found."
+
+
 def geneset2symbols(geneset: str) -> Sequence[str]:
     hallmarks_path = Path(__file__).parent / "data" / "h.all.v2023.2.Hs.json.txt"
     if not hallmarks_path.exists():
