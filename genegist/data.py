@@ -26,25 +26,26 @@ class GeneRIFS:
             df.to_parquet(cache)
         return df
 
-    def get_texts_by_gene_id(self, gene_id: int) -> Sequence[str]:
+    def get_texts_by_gene(
+        self, gene_name: str, add_abstracts: bool = False
+    ) -> Sequence[str]:
         """Get all the texts for the given gene IDs."""
+        gene_id = gene2id(gene_name)
+        print(gene_id)
         mask = (self.df["#Tax ID"] == 9606) & (self.df["Gene ID"] == gene_id)
-        return self.df[mask]["GeneRIF text"].tolist()
+        if add_abstracts:
+            abstracts = get_gene_abstracts(gene_name)
+            return self.df[mask]["GeneRIF text"].tolist() + [abstracts]
+        else:
+            return self.df[mask]["GeneRIF text"].tolist()
 
-    def get_texts_by_gene_set(self, gene_set: str) -> dict:
+    def get_texts_by_gene_set(self, gene_set: str, add_abstracts: bool = False) -> dict:
         """Get all the texts for the given gene set."""
-        genes = []
-        gene_ids = []
-        for gene in geneset2symbols(gene_set):
-            if gene2id(gene) is None:
-                raise ValueError(f"Gene {gene} not found.")
-            else:
-                genes.append(gene)
-                gene_ids.append(gene2id(gene))
-        return {
-            gene: self.get_texts_by_gene_id(gene_id)
-            for gene, gene_id in zip(genes, gene_ids)
-        }
+        gene_symbols = geneset2symbols(gene_set)
+        texts = {}
+        for gene_symbol in gene_symbols:
+            texts[gene_symbol] = self.get_texts_by_gene(gene_symbol, add_abstracts)
+        return texts
 
 
 def gene2id(gene_name: str) -> int:
