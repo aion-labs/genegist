@@ -31,7 +31,6 @@ class GeneRIFS:
     ) -> Sequence[str]:
         """Get all the texts for the given gene IDs."""
         gene_id = gene2id(gene_name)
-        print(gene_id)
         mask = (self.df["#Tax ID"] == 9606) & (self.df["Gene ID"] == gene_id)
         if add_abstracts:
             abstracts = get_gene_abstracts(gene_name)
