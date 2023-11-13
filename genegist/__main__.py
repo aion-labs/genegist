@@ -10,10 +10,18 @@ async def async_main():
     parser.add_argument("-g", "--gene", help="Look up GeneRIFS for a given gene")
     parser.add_argument("-s", "--geneset", help="Look up GeneRIFS for a given gene set")
     parser.add_argument(
-        "-a", "--abstracts", help="Also look up abstracts", action="store_true"
+        "-f",
+        "--geneset-file",
+        help="Look up GeneRIFS for file containing a list of genes",
     )
     parser.add_argument(
-        "-p", "--process", help="Find a biological process", action="store_true"
+        "-p",
+        "--process",
+        help="Find a biological process for the inputed gene set",
+        action="store_true",
+    )
+    parser.add_argument(
+        "-a", "--abstracts", help="Also look up abstracts", action="store_true"
     )
 
     args = parser.parse_args()
@@ -22,9 +30,14 @@ async def async_main():
         generifs = GeneRIFS()
         print(generifs.get_texts_by_gene(args.gene, args.abstracts))
 
-    if args.geneset:
+    if args.geneset or args.geneset_file:
         generifs = GeneRIFS()
-        texts = generifs.get_texts_by_gene_set(args.geneset, args.abstracts)
+        if args.geneset_file:
+            with open(args.geneset_file) as f:
+                genes = f.read().splitlines()
+            texts = generifs.get_texts_by_gene_set_list(genes, args.abstracts)
+        else:
+            texts = generifs.get_texts_by_gene_set(args.geneset, args.abstracts)
         if not args.process:
             print(texts)
             return
