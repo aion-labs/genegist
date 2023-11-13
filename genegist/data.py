@@ -49,6 +49,15 @@ class GeneRIFS:
             texts[gene_symbol] = self.get_texts_by_gene(gene_symbol, add_abstracts)
         return texts
 
+    def get_texts_by_gene_set_list(
+        self, gene_set: list, add_abstracts: bool = False
+    ) -> dict:
+        """Get all the texts for the given gene set."""
+        texts = {}
+        for gene_symbol in gene_set:
+            texts[gene_symbol] = self.get_texts_by_gene(gene_symbol, add_abstracts)
+        return texts
+
 
 def gene2id(gene_name: str) -> int:
     if os.environ.get("NCBI_EMAIL"):
