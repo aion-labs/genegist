@@ -21,6 +21,12 @@ async def async_main():
         action="store_true",
     )
     parser.add_argument(
+        "-d",
+        "--dry-run",
+        help="Don't actually run the biological process finder, but print the texts",
+        action="store_true",
+    )
+    parser.add_argument(
         "-a", "--abstracts", help="Also look up abstracts", action="store_true"
     )
 
@@ -42,7 +48,7 @@ async def async_main():
             print(texts)
             return
         else:
-            print(await find_biological_process(texts))
+            print(await find_biological_process(texts, args.dry_run))
 
 
 def main():
