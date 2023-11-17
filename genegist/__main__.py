@@ -29,6 +29,11 @@ async def async_main():
     parser.add_argument(
         "-a", "--abstracts", help="Also look up abstracts", action="store_true"
     )
+    parser.add_argument(
+        "-r",
+        "--dry-run-file",
+        help="Use a dry run file to find biological processes",
+    )
 
     args = parser.parse_args()
 
@@ -36,12 +41,15 @@ async def async_main():
         generifs = GeneRIFS()
         print(generifs.get_texts_by_gene(args.gene, args.abstracts))
 
-    if args.geneset or args.geneset_file:
+    if args.geneset or args.geneset_file or args.dry_run_file:
         generifs = GeneRIFS()
         if args.geneset_file:
             with open(args.geneset_file) as f:
                 genes = f.read().splitlines()
             texts = generifs.get_texts_by_gene_set_list(genes, args.abstracts)
+        if args.dry_run_file:
+            with open(args.dry_run_file) as f:
+                texts = f.read()
         else:
             texts = generifs.get_texts_by_gene_set(args.geneset, args.abstracts)
         if not args.process:
