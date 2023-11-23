@@ -6,7 +6,7 @@ authors = ["JJ Ben-Joseph <jj@tensorspace.ai>", "Yair Benita <yair@aionlabs.com>
 license = "Apache"
 
 [tool.poetry.dependencies]
-python = "^3.11"
+python = "^3.10"
 langchain = "*"
 unstructured = "*"
 openai = "*"
