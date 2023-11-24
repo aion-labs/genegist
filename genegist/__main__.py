@@ -1,11 +1,10 @@
 from argparse import ArgumentParser
-import asyncio
 
-from genegist.analyzer import find_biological_process
-from genegist.data import GeneRIFS, gene2id
+from genegist.analyzer import find_biological_process_from_genes
+from genegist.data import GeneRIFS
 
 
-async def async_main():
+def main():
     parser = ArgumentParser()
     parser.add_argument("-g", "--gene", help="Look up GeneRIFS for a given gene")
     parser.add_argument("-s", "--geneset", help="Look up GeneRIFS for a given gene set")
@@ -18,7 +17,6 @@ async def async_main():
         "-p",
         "--process",
         help="Find a biological process for the inputed gene set",
-        action="store_true",
     )
     parser.add_argument(
         "-d",
@@ -37,27 +35,24 @@ async def async_main():
 
     args = parser.parse_args()
 
+    if args.dry_run_file or args.dry_run or args.geneset:
+        raise RuntimeError("Some features are temporarily unavailable.")
+
+    if args.process:
+        generifs = GeneRIFS()
+        genes = []
+        if args.gene:
+            genes.append(args.gene)
+        if args.geneset_file:
+            with open(args.geneset_file) as f:
+                genes.extend(f.readlines())
+        print(find_biological_process_from_genes(genes, args.process))
+        return
+
     if args.gene:
         generifs = GeneRIFS()
         print(generifs.get_texts_by_gene(args.gene, args.abstracts))
 
-    if args.geneset or args.geneset_file or args.dry_run_file:
+    if args.geneset_file:
         generifs = GeneRIFS()
-        if args.geneset_file:
-            with open(args.geneset_file) as f:
-                genes = f.read().splitlines()
-            texts = generifs.get_texts_by_gene_set_list(genes, args.abstracts)
-        if args.dry_run_file:
-            with open(args.dry_run_file) as f:
-                texts = f.read()
-        else:
-            texts = generifs.get_texts_by_gene_set(args.geneset, args.abstracts)
-        if not args.process:
-            print(texts)
-            return
-        else:
-            print(await find_biological_process(texts, args.dry_run))
-
-
-def main():
-    asyncio.run(async_main())
+        print(generifs.get_texts_by_gene_set_list(args.geneset_file, args.abstracts))

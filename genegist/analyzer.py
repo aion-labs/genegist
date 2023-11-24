@@ -1,47 +1,60 @@
-from typing import Union, Dict
-import io
-from uuid import uuid4
-from paperqa import Docs
+from typing import Union, Dict, Iterable
+
+from openai import OpenAI
+
+from genegist.data import GeneRIFS
 
 
-async def find_biological_process(data: Union[Dict, str], dry_run: bool = False) -> str:
-    prompt = (
-        "Identify a subset of genes that represents a biological process, "
-        "and the role the genes in the process. You want to be as specific as possible. "
-        "Ideally, we want biological pathways."
+def summerize_gene(gene: str, rif: Iterable[str]) -> str:
+    client = OpenAI()
+
+    for i, r in enumerate(rif):
+        if r[-1] not in [".", "?", "!"]:
+            rif[i] = r + "."
+
+    # Hacky way to limit the number of tokens
+    # TODO: Switch to GPT-4 when OpenAI allows us to use it
+    rif = rif[:430]
+
+    summerize_prompt = f"In one large but concise paragraph, summarize the biological activity of the {gene} gene from the following GeneRIFS: {' '.join(rif)}"
+    summerize = client.chat.completions.create(
+        messages=[{"role": "user", "content": summerize_prompt}],
+        model="gpt-3.5-turbo-1106",
     )
-    index = Docs()
 
-    if dry_run:
-        index = []
+    return summerize.choices[0].message.content
 
-    if isinstance(data, str):
-        data = data.splitlines()
-        for line in data:
-            if line.strip() == "":
-                continue
-            with io.BytesIO(line.encode()) as gene_file:
-                index.add_file(gene_file, dockey=str(uuid4()))
-    else:
-        for gene, rif in data.items():
-            # Process and clean up the text for each gene
-            for i, r in enumerate(rif):
-                if r[-1] not in [".", "?", "!"]:
-                    rif[i] = r + "."
-            rif = " ".join(rif)
-            if rif.strip() == "":
-                continue
 
-            text = f"For the gene {gene}: {rif}"
-            if dry_run:
-                index.append(text)
-                continue
-            # Create an in-memory bytes-based file-like object for each gene's information
-            with io.BytesIO(text.encode()) as gene_file:
-                index.add_file(gene_file, dockey=gene)
+def find_biological_process_from_summaries(
+    genes: Dict[str, str], biological_process: str
+) -> str:
+    client = OpenAI()
 
-    if dry_run:
-        return "\n".join(index)
+    gene_subprompts = []
+    for gene, summary in genes.items():
+        subprompt = f"For the gene {gene}, the biological activity is: {summary}"
+        gene_subprompts.append(subprompt)
 
-    response = await index.aquery(prompt)
-    return response.answer
+    bioprocess_prompt = (
+        f"Identify the subset of genes below that represents the {biological_process} biological process."
+        "and the role each gene has in the process. Do not include any other genes and use the information provided."
+        "You want to be as specific as possible. "
+        "We want a narrative of the biological pathway in prose format."
+        f"{f'{chr(92)}n'.join(gene_subprompts)}"
+    )
+
+    bioprocess = client.chat.completions.create(
+        messages=[{"role": "user", "content": bioprocess_prompt}],
+        model="gpt-3.5-turbo-1106",
+    )
+    return bioprocess.choices[0].message.content
+
+
+def find_biological_process_from_genes(
+    input_genes: Iterable[Union[str, int]], biological_process: str
+) -> str:
+    genes = dict()
+    for gene in input_genes:
+        genes[gene] = summerize_gene(gene, GeneRIFS().get_texts_by_gene(gene))
+
+    return find_biological_process_from_summaries(genes, biological_process)
