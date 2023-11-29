@@ -16,7 +16,7 @@ def summerize_gene(gene: str, rif: Iterable[str]) -> str:
     # TODO: Switch to GPT-4 when OpenAI allows us to use it
     rif = rif[:430]
 
-    summerize_prompt = f"In one large but concise paragraph, summarize the biological activity of the {gene} gene from the following GeneRIFS: {' '.join(rif)}"
+    summerize_prompt = f"In concise paragraph, summarize the biological activity of the {gene} gene from the following GeneRIFS: {' '.join(rif)}"
     summerize = client.chat.completions.create(
         messages=[{"role": "user", "content": summerize_prompt}],
         model="gpt-3.5-turbo-1106",
