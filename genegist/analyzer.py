@@ -34,12 +34,15 @@ def find_biological_process_from_summaries(
     for gene, summary in genes.items():
         subprompt = f"For the gene {gene}, the biological activity is: {summary}"
         gene_subprompts.append(subprompt)
-
+    
     bioprocess_prompt = (
-        f"Identify the subset of genes below that represents the {biological_process} biological process."
-        "and the role each gene has in the process. Do not include any other genes and use the information provided."
-        "You want to be as specific as possible. "
-        "We want a narrative of the biological pathway in prose format."
+        "Please identify and describe the subset of genes specifically involved in the "
+        f"'{biological_process}' biological process, using the provided information. "
+        "For each gene, detail its unique role and function within this process. "
+        f"Exclude any genes not directly related to '{biological_process}'. "
+        "Your response should be structured as a clear, comprehensive narrative, "
+        "detailing the biological pathway in a prose format. Aim for precision and "
+        "thoroughness in your explanation."
         f"{f'{chr(92)}n'.join(gene_subprompts)}"
     )
 
