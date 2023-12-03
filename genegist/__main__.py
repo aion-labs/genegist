@@ -1,4 +1,5 @@
 from argparse import ArgumentParser
+import pickle
 
 from genegist.analyzer import find_biological_process_from_genes
 from genegist.data import GeneRIFS
@@ -20,32 +21,38 @@ def main():
     )
     parser.add_argument(
         "-d",
-        "--dry-run",
-        help="Don't actually run the biological process finder, but print the texts",
-        action="store_true",
+        "--create-dry-run",
+        help="Don't actually run the biological process finder, but save the gene summaries to a file",
     )
     parser.add_argument(
         "-a", "--abstracts", help="Also look up abstracts", action="store_true"
     )
     parser.add_argument(
         "-r",
-        "--dry-run-file",
-        help="Use a dry run file to find biological processes",
+        "--load-dry-run",
+        help="Load the gene summaries from a file instead of running the the LLM on them explictly",
     )
 
     args = parser.parse_args()
 
-    if args.dry_run_file or args.dry_run or args.geneset:
-        raise RuntimeError("Some features are temporarily unavailable.")
-
     if args.process:
         generifs = GeneRIFS()
         genes = []
-        if args.gene:
+        if args.geneset:
+            genes.extend(generifs.get_genes_by_geneset(args.geneset))
+        elif args.gene:
             genes.append(args.gene)
-        if args.geneset_file:
+        elif args.geneset_file:
             with open(args.geneset_file) as f:
                 genes.extend(f.readlines())
+        if args.load_dry_run:
+            with open(args.load_dry_run, "rb") as f:
+                genes = pickle.load(f)
+        elif args.create_dry_run:
+            with open(args.create_dry_run, "wb") as f:
+                summary = find_biological_process_from_genes(genes, None, just_summaries=True)
+                pickle.dump(summary, f)
+            return
         print(find_biological_process_from_genes(genes, args.process))
         return
 

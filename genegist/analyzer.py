@@ -51,10 +51,14 @@ def find_biological_process_from_summaries(
 
 
 def find_biological_process_from_genes(
-    input_genes: Iterable[Union[str, int]], biological_process: str
+    input_genes: Union[Iterable[Union[str, int]], dict], biological_process: str, just_summaries: bool = False
 ) -> str:
-    genes = dict()
-    for gene in input_genes:
-        genes[gene] = summerize_gene(gene, GeneRIFS().get_texts_by_gene(gene))
-
+    if isinstance(input_genes, dict):
+        genes = input_genes
+    else:
+        genes = dict()
+        for gene in input_genes:
+            genes[gene] = summerize_gene(gene, GeneRIFS().get_texts_by_gene(gene))
+    if just_summaries:
+        return genes
     return find_biological_process_from_summaries(genes, biological_process)
