@@ -5,7 +5,7 @@ from openai import OpenAI
 from genegist.data import GeneRIFS
 
 
-def summerize_gene(gene: str, rif: Iterable[str]) -> str:
+def summarize_gene(gene: str, rif: Iterable[str]) -> str:
     client = OpenAI()
 
     for i, r in enumerate(rif):
@@ -61,7 +61,7 @@ def find_biological_process_from_genes(
     else:
         genes = dict()
         for gene in input_genes:
-            genes[gene] = summerize_gene(gene, GeneRIFS().get_texts_by_gene(gene))
+            genes[gene] = summarize_gene(gene, GeneRIFS().get_texts_by_gene(gene))
     if just_summaries:
         return genes
     return find_biological_process_from_summaries(genes, biological_process)
