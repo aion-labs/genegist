@@ -12,13 +12,14 @@ def summarize_gene(gene: str, rif: Iterable[str]) -> str:
         if r[-1] not in [".", "?", "!"]:
             rif[i] = r + "."
 
-    # Hacky way to limit the number of tokens
-    # TODO: Switch to GPT-4 when OpenAI allows us to use it
-    rif = rif[:430]
-
-    summerize_prompt = f"In concise paragraph, summarize the biological activity of the {gene} gene from the following GeneRIFS: {' '.join(rif)}"
+    summarize_prompt = (
+        f"Provide a concise, one-paragraph summary of the biological activity and functions "
+        f"of the '{gene}' gene. Base your summary on the following Gene Reference Into Function (GeneRIFs) data: "
+        f"{' '.join(rif)}. Focus on key aspects such as gene expression, regulatory mechanisms, "
+        "and its role in cellular processes or disease states, as relevant."
+    )
     summerize = client.chat.completions.create(
-        messages=[{"role": "user", "content": summerize_prompt}],
+        messages=[{"role": "user", "content": summarize_prompt}],
         model="gpt-4-1106-preview",
     )
 
