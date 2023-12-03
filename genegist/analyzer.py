@@ -19,7 +19,7 @@ def summerize_gene(gene: str, rif: Iterable[str]) -> str:
     summerize_prompt = f"In concise paragraph, summarize the biological activity of the {gene} gene from the following GeneRIFS: {' '.join(rif)}"
     summerize = client.chat.completions.create(
         messages=[{"role": "user", "content": summerize_prompt}],
-        model="gpt-3.5-turbo-1106",
+        model="gpt-4-1106-preview",
     )
 
     return summerize.choices[0].message.content
@@ -45,7 +45,7 @@ def find_biological_process_from_summaries(
 
     bioprocess = client.chat.completions.create(
         messages=[{"role": "user", "content": bioprocess_prompt}],
-        model="gpt-3.5-turbo-1106",
+        model="gpt-4-1106-preview",
     )
     return bioprocess.choices[0].message.content
 
