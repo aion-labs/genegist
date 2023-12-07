@@ -1,8 +1,66 @@
 from typing import Union, Dict, Iterable
+
 from openai import OpenAI
+import tiktoken
+
 from genegist.data import GeneRIFS
 
-def summarize_gene(gene: str, rif: Iterable[str]) -> str:
+
+def distill(
+    full_text: str,
+    encoding: tiktoken.Encoding = tiktoken.encoding_for_model("gpt-4-1106-preview"),
+    max_tokens: int = 128000,
+) -> str:
+    """
+    Summarizes a given text by breaking it into chunks and processing each chunk using an OpenAI model.
+
+    Args:
+        full_text (str): The text to be summarized.
+        encoding (tiktoken.Encoding): The encoding to be used for tokenizing the text. Defaults to the encoding suitable for "gpt-4-1106-preview".
+        max_tokens (int): The maximum number of tokens that can be processed in a single request. Defaults to 128000.
+
+    Returns:
+        str: A summarized version of the provided text.
+    """
+
+    prompt = "Summarize the following text:\n\n"
+    tokens = encoding.encode(full_text)
+    prompt_size = len(encoding.encode(prompt))
+    if len(tokens) <= max_tokens:
+        return full_text
+
+    chunks = []
+    working_chunk = []
+    size = 0
+    client = OpenAI()
+
+    for i, token in enumerate(tokens):
+        working_chunk.append(token)
+        size += 1
+
+        if size >= (max_tokens - prompt_size) or i == len(tokens) - 1:
+            decoded_chunk = [encoding.decode(part) for part in working_chunk]
+            working_chunk = []
+            size = 0
+
+            response = client.chat.completions.create(
+                messages=[
+                    {
+                        "role": "user",
+                        "content": prompt + decoded_chunk,
+                    }
+                ],
+                model="gpt-3.5-turbo-1106",
+            )
+
+            chunks.append(response.choices[0].message.content.strip())
+
+    final_summary = " ".join(chunks)
+
+    return final_summary
+
+
+def summarize_gene(gene: str, rif: Iterable[str], biological_process: str) -> str:
     """
     Generates a summary for a given gene based on a set of GeneRIFs (Gene Reference Into Function) data.
 
@@ -20,11 +78,13 @@ def summarize_gene(gene: str, rif: Iterable[str]) -> str:
         if r[-1] not in [".", "?", "!"]:
             rif[i] = r + "."
 
+    data = distill(" ".join(rif))
+
     # Construct the summary prompt.
     summarize_prompt = (
         f"Provide a concise, one-paragraph summary of the biological activity and functions "
-        f"of the '{gene}' gene. Base your summary on the following GeneRIFs data: "
-        f"{' '.join(rif)}. Focus on key aspects such as gene expression, regulatory mechanisms, "
+        f"of the '{gene}' gene. Base your summary on the following information: "
+        f"{data}. Focus on key aspects such as gene expression, regulatory mechanisms, "
         "and its role in cellular processes or disease states, as relevant."
     )
 
@@ -76,8 +136,11 @@ def find_biological_process_from_summaries(
     )
     return bioprocess.choices[0].message.content
 
+
 def find_biological_process_from_genes(
-    input_genes: Union[Iterable[Union[str, int]], dict], biological_process: str, just_summaries: bool = False
+    input_genes: Union[Iterable[Union[str, int]], dict],
+    biological_process: str,
+    just_summaries: bool = False,
 ) -> str:
     """
     Determines the involvement of a set of genes in a specific biological process, either by summarizing gene information
@@ -97,7 +160,10 @@ def find_biological_process_from_genes(
     else:
         genes = dict()
         for gene in input_genes:
-            genes[gene] = summarize_gene(gene, GeneRIFS().get_texts_by_gene(gene))
+            genes[gene] = summarize_gene(
+                gene,
+                GeneRIFS().get_texts_by_gene(gene, add_abstracts=True),
+            )
 
     # Return just the summaries if requested.
     if just_summaries:
