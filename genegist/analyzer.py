@@ -178,7 +178,8 @@ class Analyzer:
         self,
         input_genes: Union[Iterable[Union[str, int]], dict],
         just_summaries: bool = False,
-    ) -> str:
+        add_abstracts: bool = False,
+    ) -> Union[str, dict]:
         """
         Determines the involvement of a set of genes in a specific biological process, either by summarizing gene information
         or directly from provided gene summaries.
@@ -187,9 +188,10 @@ class Analyzer:
         input_genes (Union[Iterable[Union[str, int]], dict]): A collection of genes or a dictionary of gene summaries.
         biological_process (str): The biological process to investigate.
         just_summaries (bool, optional): If True, returns only the gene summaries. Defaults to False.
+        add_abstracts (bool, optional): If True, also uses abstracts to create synthetic GeneRIFs. Defaults to False.
 
         Returns:
-        str: Either a dictionary of gene summaries or a narrative about the genes involved in the biological process.
+        Union[str, dict]: Either a dictionary of gene summaries or a narrative about the genes involved in the biological process.
         """
         # Convert the input genes to a dictionary of summaries if not already in dictionary form.
         if isinstance(input_genes, dict):
