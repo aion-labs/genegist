@@ -127,7 +127,7 @@ class Analyzer:
 
         prompt = (
             f"Provide a list of concise, one-sentence summaries of the biological activity and functions "
-            f"of the '{gene}' gene related to f{self.biological_process}, similar to a GeneRIF. Base your "
+            f"of the '{gene}' gene related to {self.biological_process}, similar to a GeneRIF. Base your "
             "summary on the following information: "
             f"{abstracts}. Focus on key aspects such as gene expression, regulatory mechanisms, "
             "and its role in cellular processes or disease states, as relevant."
