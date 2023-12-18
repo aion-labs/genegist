@@ -207,6 +207,4 @@ class Analyzer:
             return genes
 
         # Otherwise, find the genes involved in the biological process.
-        return self.find_biological_process_from_summaries(
-            genes, self.biological_process
-        )
+        return self.find_biological_process_from_summaries(genes)

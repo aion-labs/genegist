@@ -62,7 +62,7 @@ def main():
                 )
                 pickle.dump(summary, f)
             return
-        print(analyzer.find_biological_process_from_gene(genes))
+        print(analyzer.find_biological_process_from_genes(genes))
         return
 
     if args.gene:
