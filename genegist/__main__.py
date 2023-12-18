@@ -1,7 +1,7 @@
 from argparse import ArgumentParser
 import pickle
 
-from genegist.analyzer import find_biological_process_from_genes
+from genegist.analyzer import Analyzer
 from genegist.data import GeneRIFS
 
 
@@ -32,12 +32,19 @@ def main():
         "--load-dry-run",
         help="Load the gene summaries from a file instead of running the the LLM on them explictly",
     )
+    parser.add_argument(
+        "--llm",
+        help="Specify the LLM to use",
+        choices=["gpt-3.5-turbo-1106", "gpt-4-1106-preview"],
+        default="gpt-4-1106-preview",
+    )
 
     args = parser.parse_args()
 
     if args.process:
         generifs = GeneRIFS()
         genes = []
+        analyzer = Analyzer(biological_process=args.process, llm=args.llm)
         if args.geneset:
             genes.extend(generifs.get_genes_by_geneset(args.geneset))
         elif args.gene:
@@ -50,10 +57,12 @@ def main():
                 genes = pickle.load(f)
         elif args.create_dry_run:
             with open(args.create_dry_run, "wb") as f:
-                summary = find_biological_process_from_genes(genes, None, just_summaries=True)
+                summary = analyzer.find_biological_process_from_genes(
+                    genes, just_summaries=True
+                )
                 pickle.dump(summary, f)
             return
-        print(find_biological_process_from_genes(genes, args.process))
+        print(analyzer.find_biological_process_from_gene(genes))
         return
 
     if args.gene:
