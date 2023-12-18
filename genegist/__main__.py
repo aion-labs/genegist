@@ -58,17 +58,21 @@ def main():
         elif args.create_dry_run:
             with open(args.create_dry_run, "wb") as f:
                 summary = analyzer.find_biological_process_from_genes(
-                    genes, just_summaries=True
+                    genes, just_summaries=True, add_abstracts=args.abstracts
                 )
                 pickle.dump(summary, f)
             return
-        print(analyzer.find_biological_process_from_genes(genes))
+        print(
+            analyzer.find_biological_process_from_genes(
+                genes, add_abstracts=args.abstracts
+            )
+        )
         return
 
     if args.gene:
         generifs = GeneRIFS()
-        print(generifs.get_texts_by_gene(args.gene, args.abstracts))
+        print(generifs.get_texts_by_gene(args.gene))
 
     if args.geneset_file:
         generifs = GeneRIFS()
-        print(generifs.get_texts_by_gene_set_list(args.geneset_file, args.abstracts))
+        print(generifs.get_texts_by_gene_set_list(args.geneset_file))

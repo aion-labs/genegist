@@ -6,7 +6,7 @@ from typing import Union, Dict, Iterable
 from openai import OpenAI, RateLimitError
 import tiktoken
 
-from genegist.data import GeneRIFS
+from genegist.data import GeneRIFS, get_gene_abstracts
 
 
 class Analyzer:
@@ -109,6 +109,34 @@ class Analyzer:
 
         return final_summary
 
+    def create_generifs_from_abstracts(
+        self, gene: str, abstracts: str
+    ) -> Iterable[str]:
+        """
+        Creates GeneRIFs (Gene Reference Into Function) data from a set of abstracts.
+
+        Args:
+        gene (str): The name of the gene to be summarized.
+        abstracts (str): A collection of abstracts related to the gene.
+
+        Returns:
+        Iterable[str]: A collection of GeneRIFs data related to the gene.
+        """
+
+        abstracts = self.distill(abstracts)
+
+        prompt = (
+            f"Provide a list of concise, one-sentence summaries of the biological activity and functions "
+            f"of the '{gene}' gene related to f{self.biological_process}, similar to a GeneRIF. Base your "
+            "summary on the following information: "
+            f"{abstracts}. Focus on key aspects such as gene expression, regulatory mechanisms, "
+            "and its role in cellular processes or disease states, as relevant."
+        )
+
+        result = self.call_llm(prompt, self.llm).split(".")
+        result = [r.strip() for r in result if r != ""]
+        return result
+
     def summarize_gene(self, gene: str, rif: Iterable[str]) -> str:
         """
         Generates a summary for a given gene based on a set of GeneRIFs (Gene Reference Into Function) data.
@@ -199,9 +227,13 @@ class Analyzer:
         else:
             genes = dict()
             for gene in input_genes:
+                rifs = GeneRIFS().get_texts_by_gene(gene)
+                if add_abstracts:
+                    abstracts = get_gene_abstracts(gene)
+                    rifs.extend(self.create_generifs_from_abstracts(gene, abstracts))
                 genes[gene] = self.summarize_gene(
                     gene,
-                    GeneRIFS().get_texts_by_gene(gene, add_abstracts=True),
+                    rifs,
                 )
 
         # Return just the summaries if requested.

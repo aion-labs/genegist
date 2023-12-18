@@ -26,20 +26,14 @@ class GeneRIFS:
             df.to_parquet(cache)
         return df
 
-    def get_texts_by_gene(
-        self, gene_name: str, add_abstracts: bool = False
-    ) -> Sequence[str]:
+    def get_texts_by_gene(self, gene_name: str) -> Sequence[str]:
         """Get all the texts for the given gene IDs."""
         if gene_name.isnumeric():
             gene_id = int(gene_name)
         else:
             gene_id = gene2id(gene_name)
         mask = (self.df["#Tax ID"] == 9606) & (self.df["Gene ID"] == gene_id)
-        if add_abstracts:
-            abstracts = get_gene_abstracts(gene_name)
-            return self.df[mask]["GeneRIF text"].tolist() + [abstracts]
-        else:
-            return self.df[mask]["GeneRIF text"].tolist()
+        return self.df[mask]["GeneRIF text"].tolist()
 
     def get_texts_by_gene_set(self, gene_set: str, add_abstracts: bool = False) -> dict:
         """Get all the texts for the given gene set."""
