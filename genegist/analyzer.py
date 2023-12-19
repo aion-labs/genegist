@@ -10,7 +10,7 @@ from genegist.data import GeneRIFS, get_gene_abstracts
 
 
 class Analyzer:
-    def __init__(self, biological_process: str, llm: str = "gpt-4-1106-preview"):
+    def __init__(self, biological_process: str = None, llm: str = "gpt-4-1106-preview"):
         self.biological_process = biological_process
         self.llm = llm
 
