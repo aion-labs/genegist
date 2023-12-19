@@ -38,6 +38,11 @@ def main():
         choices=["gpt-3.5-turbo-1106", "gpt-4-1106-preview"],
         default="gpt-4-1106-preview",
     )
+    parser.add_argument(
+        "-m",
+        "--article",
+        help="Get the summary for a given PMID",
+    )
 
     args = parser.parse_args()
 
@@ -76,3 +81,7 @@ def main():
     if args.geneset_file:
         generifs = GeneRIFS()
         print(generifs.get_texts_by_gene_set_list(args.geneset_file))
+
+    if args.article:
+        analyzer = Analyzer(llm=args.llm)
+        print(analyzer.summarize_article(args.article))
