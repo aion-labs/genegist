@@ -6,7 +6,7 @@ from typing import Union, Dict, Iterable
 from openai import OpenAI, RateLimitError
 import tiktoken
 
-from genegist.data import GeneRIFS, get_gene_abstracts
+from genegist.data import GeneRIFS, get_gene_abstracts, get_article
 
 
 class Analyzer:
@@ -47,6 +47,27 @@ class Analyzer:
                 )
 
         return result.choices[0].message.content.strip()
+
+    def summarize_article(self, pmid: str) -> str:
+        """
+        Summarizes a given article.
+
+        Args:
+            pmid (str): The PubMed ID of the article to be summarized.
+
+        Returns:
+            str: A summary of the article.
+        """
+
+        article = get_article(pmid)
+        if article is None:
+            return "No article found."
+
+        article = self.distill(article)
+
+        prompt = f"Summarize the following article:\n\n{article}"
+
+        return self.call_llm(prompt, self.llm)
 
     def distill(
         self,
