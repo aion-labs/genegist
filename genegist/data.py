@@ -9,9 +9,15 @@ import pandas as pd
 
 class GeneRIFS:
     def __init__(self):
+        """
+        GeneRIFs (Gene References Into Function) are short, descriptive summaries of a
+        gene's function from the Gene database at NCBI.
+        """
         self.df = self.get_generifs()
 
     def get_generifs(self) -> pd.DataFrame:
+        """Get the GeneRIFs data."""
+
         url = "https://ftp.ncbi.nlm.nih.gov/gene/GeneRIF/generifs_basic.gz"
         cache = Path(__file__).parent / "data" / "generifs_basic.parquet"
         if cache.exists():
