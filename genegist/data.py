@@ -1,7 +1,8 @@
 import json
 import os
 from pathlib import Path
-from typing import Sequence
+from typing import Sequence, Optional
+import xml.etree.ElementTree as ET
 
 from Bio import Entrez
 import pandas as pd
@@ -100,6 +101,49 @@ def get_gene_abstracts(gene_name: str, max_results: int = 100) -> str:
         return abstracts
     else:
         return "No results found."
+
+
+def get_article(pmid: str) -> Optional[str]:
+    if os.environ.get("NCBI_EMAIL"):
+        Entrez.email = os.environ["NCBI_EMAIL"]
+    else:
+        raise ValueError("Please set the NCBI_EMAIL environment variable.")
+
+    def parse_article_xml(xml_data: str) -> Optional[str]:
+        try:
+            root = ET.fromstring(xml_data)
+            article_text_segments = []
+            tags_of_interest = ["title", "p", "sec"]
+
+            def extract_text(element):
+                for el in element:
+                    if el.tag in tags_of_interest:
+                        if el.text:
+                            article_text_segments.append(el.text.strip())
+                    extract_text(el)
+
+            extract_text(root)
+            return "\n\n".join(article_text_segments)
+        except Exception as e:
+            return f"An error occurred while parsing XML: {e}"
+
+    try:
+        link_handle = Entrez.elink(dbfrom="pubmed", db="pmc", id=pmid)
+        link_results = Entrez.read(link_handle)
+        link_handle.close()
+
+        if not link_results[0]["LinkSetDb"]:
+            return "No PMC article found for this PMID."
+
+        pmc_id = link_results[0]["LinkSetDb"][0]["Link"][0]["Id"]
+
+        fetch_handle = Entrez.efetch(db="pmc", id=pmc_id, rettype="xml")
+        article_xml = fetch_handle.read().strip()
+        fetch_handle.close()
+
+        return parse_article_xml(article_xml)
+    except Exception as e:
+        return f"An error occurred while fetching the article: {e}"
 
 
 def geneset2symbols(geneset: str) -> Sequence[str]:
