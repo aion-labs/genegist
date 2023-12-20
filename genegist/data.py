@@ -111,6 +111,25 @@ def get_gene_abstracts(gene_name: str, max_results: int = 100) -> str:
         return "No results found."
 
 
+def get_abstract(pmid: str) -> str:
+    """Get NCBI published abstract for a given PubMed ID."""
+
+    if os.environ.get("NCBI_EMAIL"):
+        Entrez.email = os.environ["NCBI_EMAIL"]
+    else:
+        raise ValueError("Please set the NCBI_EMAIL environment variable.")
+
+    if pmid:
+        fetch_handle = Entrez.efetch(
+            db="pubmed", id=pmid, rettype="abstract", retmode="text"
+        )
+        abstract = fetch_handle.read()
+        fetch_handle.close()
+        return abstract
+    else:
+        return "No PMID provided."
+
+
 def get_article(pmid: str) -> Optional[str]:
     """Get article for a given PMID, assuming it is open access."""
 
