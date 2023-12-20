@@ -147,7 +147,7 @@ class Analyzer:
         abstracts = self.distill(abstracts)
 
         prompt = (
-            f"Provide a list of concise, one-sentence summaries of the biological activity and functions "
+            f"Provide exactly one concise, one-sentence summary of the biological activity and functions "
             f"of the '{gene}' gene related to {self.biological_process}, similar to a GeneRIF. Base your "
             "summary on the following information: "
             f"{abstracts}. Focus on key aspects such as gene expression, regulatory mechanisms, "
@@ -156,7 +156,7 @@ class Analyzer:
 
         result = self.call_llm(prompt, self.llm).split(".")
         result = [r.strip() for r in result if r != ""]
-        return result
+        return result[0]
 
     def summarize_gene(self, gene: str, rif: Iterable[str]) -> str:
         """
