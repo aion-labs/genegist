@@ -86,6 +86,34 @@ def gene2id(gene_name: str) -> int:
     return int(gene_id)
 
 
+def id2gene(gene_id: int) -> str:
+    """Get the gene name for the given NCBI gene ID."""
+
+    if os.environ.get("NCBI_EMAIL"):
+        Entrez.email = os.environ["NCBI_EMAIL"]
+    else:
+        raise ValueError("Please set the NCBI_EMAIL environment variable.")
+
+    handle = Entrez.esummary(db="gene", id=str(gene_id))
+    record = Entrez.read(handle)
+    handle.close()
+
+    if not record:
+        return None
+
+    # Extracting the gene name from the record
+    if (
+        "DocumentSummarySet" in record
+        and "DocumentSummary" in record["DocumentSummarySet"]
+    ):
+        summaries = record["DocumentSummarySet"]["DocumentSummary"]
+        if summaries:
+            gene_name = summaries[0]["Name"]
+            return gene_name
+
+    return None
+
+
 def get_gene_abstracts(gene_name: str, max_results: int = 100) -> str:
     """Get NCBI published abstractions for a given gene."""
 
