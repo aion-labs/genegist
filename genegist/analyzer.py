@@ -6,7 +6,13 @@ from typing import Union, Dict, Iterable
 from openai import OpenAI, RateLimitError
 import tiktoken
 
-from genegist.data import GeneRIFS, get_gene_abstracts, get_article
+from genegist.data import (
+    GeneRIFS,
+    get_gene_abstracts,
+    get_article,
+    get_abstract,
+    id2gene,
+)
 
 
 class Analyzer:
@@ -223,6 +229,27 @@ class Analyzer:
 
         # Request the analysis from the OpenAI API.
         return self.call_llm(bioprocess_prompt, self.llm)
+
+    def create_synthetic_generifs_paired_with_ground_truth(self):
+        """
+        Creates synthetic GeneRIFs (Gene Reference Into Function) data from a set of abstracts.
+        """
+        generifs = GeneRIFS()
+        df = generifs.get_generifs()
+
+        df = df[df["#Tax ID"] == 9606]  # Only human genes
+        df = df[df["PubMed ID (PMID) list"].str.len() > 0]  # Only genes with PMIDs
+        df = df[df["GeneRIF text"].str.len() > 0]  # Only genes with GeneRIFs
+
+        for _, row in df.iterrows():
+            abstract = get_abstract(row["PubMed ID (PMID) list"])
+            gene_id = row["Gene ID"]
+            gene_name = id2gene(gene_id)
+            if abstract is None or gene_name is None:
+                continue
+            yield gene_id, gene_name, row[
+                "GeneRIF text"
+            ], self.create_generifs_from_abstracts(gene_name, abstract)
 
     def find_biological_process_from_genes(
         self,
