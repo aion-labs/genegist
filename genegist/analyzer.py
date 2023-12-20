@@ -216,7 +216,8 @@ class Analyzer:
             f"Exclude any genes not directly related to '{self.biological_process}'. "
             "Your response should be structured as a clear, comprehensive narrative, "
             "detailing the biological pathway in a prose format. Aim for precision and "
-            "thoroughness in your explanation."
+            "specificity in your explanation. Provide a mechanistic hypothesis for the role of each gene in "
+            f"{self.biological_process}"
             f"{f'{chr(92)}n'.join(gene_subprompts)}"
         )
 
