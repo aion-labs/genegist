@@ -14,6 +14,7 @@ class GeneRIFS:
         GeneRIFs (Gene References Into Function) are short, descriptive summaries of a
         gene's function from the Gene database at NCBI.
         """
+
         self.df = self.get_generifs()
 
     def get_generifs(self) -> pd.DataFrame:
@@ -35,6 +36,7 @@ class GeneRIFS:
 
     def get_texts_by_gene(self, gene_name: str) -> Sequence[str]:
         """Get all the texts for the given gene IDs."""
+
         if gene_name.isnumeric():
             gene_id = int(gene_name)
         else:
@@ -44,6 +46,7 @@ class GeneRIFS:
 
     def get_texts_by_gene_set(self, gene_set: str, add_abstracts: bool = False) -> dict:
         """Get all the texts for the given gene set."""
+
         gene_symbols = geneset2symbols(gene_set)
         texts = {}
         for gene_symbol in gene_symbols:
@@ -54,6 +57,7 @@ class GeneRIFS:
         self, gene_set: list, add_abstracts: bool = False
     ) -> dict:
         """Get all the texts for the given gene set."""
+
         texts = {}
         for gene_symbol in gene_set:
             texts[gene_symbol] = self.get_texts_by_gene(gene_symbol, add_abstracts)
@@ -61,6 +65,8 @@ class GeneRIFS:
 
 
 def gene2id(gene_name: str) -> int:
+    """Get the NCBI gene ID for the given gene name."""
+
     if os.environ.get("NCBI_EMAIL"):
         Entrez.email = os.environ["NCBI_EMAIL"]
     else:
@@ -81,6 +87,8 @@ def gene2id(gene_name: str) -> int:
 
 
 def get_gene_abstracts(gene_name: str, max_results: int = 100) -> str:
+    """Get NCBI published abstractions for a given gene."""
+
     if os.environ.get("NCBI_EMAIL"):
         Entrez.email = os.environ["NCBI_EMAIL"]
     else:
@@ -104,6 +112,8 @@ def get_gene_abstracts(gene_name: str, max_results: int = 100) -> str:
 
 
 def get_article(pmid: str) -> Optional[str]:
+    """Get article for a given PMID, assuming it is open access."""
+
     if os.environ.get("NCBI_EMAIL"):
         Entrez.email = os.environ["NCBI_EMAIL"]
     else:
@@ -147,6 +157,8 @@ def get_article(pmid: str) -> Optional[str]:
 
 
 def geneset2symbols(geneset: str) -> Sequence[str]:
+    """Get the gene symbols for the given geneset."""
+
     hallmarks_path = Path(__file__).parent / "data" / "h.all.v2023.2.Hs.json.txt"
     if not hallmarks_path.exists():
         raise ValueError(
