@@ -1,7 +1,7 @@
 from argparse import ArgumentParser
 import pickle
 
-from tqdm.auto import tqdm
+from tqdm import tqdm
 
 from genegist.analyzer import Analyzer
 from genegist.data import GeneRIFS
