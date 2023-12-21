@@ -4,6 +4,8 @@ import re
 from typing import Union, Dict, Iterable, Tuple
 
 from openai import OpenAI, RateLimitError
+import numpy as np
+from sentence_transformers import SentenceTransformer
 import tiktoken
 
 from genegist.data import (
@@ -303,3 +305,17 @@ class Analyzer:
 
         # Otherwise, find the genes involved in the biological process.
         return self.find_biological_process_from_summaries(genes)
+
+
+class Embedding:
+    def __init__(self):
+        self.embedding = SentenceTransformer("all-MiniLM-L6-v2")
+        self.generifs = GeneRIFS().get_generifs()
+
+    def get_embedding(self, gene: str) -> np.ndarray:
+        """Get the embedding for the given gene."""
+        gene = gene2id(gene)
+        texts = self.generifs[self.generifs["Gene ID"] == gene]["GeneRIF text"].tolist()
+        if len(texts) == 0:
+            return None
+        return self.embedding.encode(texts)
