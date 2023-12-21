@@ -1,7 +1,7 @@
 import logging
 from time import sleep
 import re
-from typing import Union, Dict, Iterable
+from typing import Union, Dict, Iterable, Tuple
 
 from openai import OpenAI, RateLimitError
 import tiktoken
@@ -12,6 +12,7 @@ from genegist.data import (
     get_article,
     get_abstract,
     id2gene,
+    gene2id,
 )
 
 
@@ -230,9 +231,18 @@ class Analyzer:
         # Request the analysis from the OpenAI API.
         return self.call_llm(bioprocess_prompt, self.llm)
 
-    def create_synthetic_generifs_paired_with_ground_truth(self):
+    def create_synthetic_generifs_paired_with_ground_truth(
+        self, gene: str = None
+    ) -> Iterable[Tuple[str, str, str, str]]:
         """
         Creates synthetic GeneRIFs (Gene Reference Into Function) data from a set of abstracts.
+
+        Args:
+            gene (str): The name of the gene to be summarized. Default is all genes.
+
+        Returns:
+            Iterable[Tuple[str, str, str, str]]: A collection of tuples of structure: NCBI gene id,
+            gene name, ground truth GeneRIF, synthetic GeneRIF.
         """
         generifs = GeneRIFS()
         df = generifs.get_generifs()
@@ -240,6 +250,8 @@ class Analyzer:
         df = df[df["#Tax ID"] == 9606]  # Only human genes
         df = df[df["PubMed ID (PMID) list"].str.len() > 0]  # Only genes with PMIDs
         df = df[df["GeneRIF text"].str.len() > 0]  # Only genes with GeneRIFs
+        if gene is not None:
+            df = df[df["Gene ID"] == gene2id(gene)]
 
         for _, row in df.iterrows():
             abstract = get_abstract(row["PubMed ID (PMID) list"])
