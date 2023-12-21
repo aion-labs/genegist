@@ -1,6 +1,8 @@
 from argparse import ArgumentParser
 import pickle
 
+from tqdm.auto import tqdm
+
 from genegist.analyzer import Analyzer
 from genegist.data import GeneRIFS
 
@@ -43,6 +45,11 @@ def main():
         "--article",
         help="Get the summary for a given PMID",
     )
+    parser.add_argument(
+        "-y",
+        "--synthetic-generifs",
+        help="Create synthetic generifs and save them to a tab-delimited file",
+    )
 
     args = parser.parse_args()
 
@@ -72,6 +79,18 @@ def main():
                 genes, add_abstracts=args.abstracts
             )
         )
+        return
+
+    if args.synthetic_generifs:
+        analyzer = Analyzer(llm=args.llm)
+        gen = analyzer.create_synthetic_generifs_paired_with_ground_truth(args.gene)
+        with open(args.synthetic_generifs, "w") as f:
+            f.write("gene id\tgene name\tground truth\tsynth genegist\n")
+            for gid, gname, ground, synth in tqdm(
+                gen, desc="Writing synthetic generifs", unit=" generif"
+            ):
+                f.write(f"{gid}\t{gname}\t{ground}\t{synth}\n")
+
         return
 
     if args.gene:
