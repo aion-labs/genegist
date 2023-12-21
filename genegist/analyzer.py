@@ -154,11 +154,11 @@ class Analyzer:
         abstracts = self.distill(abstracts)
 
         prompt = (
-            f"Provide exactly one concise, one-sentence summary of the biological activity and functions "
+            f"Provide exactly one concise, very short one-sentence summary of the biological activity and functions "
             f"of the '{gene}' gene related to {self.biological_process}, similar to a GeneRIF. Base your "
             "summary on the following information: "
             f"{abstracts}. Focus on key aspects such as gene expression, regulatory mechanisms, "
-            "and its role in cellular processes or disease states, as relevant."
+            "and its role in cellular processes or disease states, as relevant. Keep it as short as possible, like the size of a tweet."
         )
 
         result = self.call_llm(prompt, self.llm).split(".")
