@@ -37,12 +37,33 @@ poetry run genegist [options]
 ```
 
 ### Options
-- `-g` or `--gene`: Look up GeneRIFS for a given gene
-- `-s` or `--geneset`: Look up GeneRIFS for a given gene set
-- `-f` or `--geneset-file`: Look up GeneRIFS for file containing a list of genes
-- `-p` or `--process`: Find a biological process for the inputted gene set
-- `-d` or `--dry-run`: Print the texts without running the biological process finder
-- `-a` or `--abstracts`: Also look up abstracts
+
+- `-g GENE`, `--gene GENE`: 
+  Look up GeneRIFs for a given gene.
+
+- `-s GENESET`, `--geneset GENESET`: 
+  Look up GeneRIFs for a given gene set.
+
+- `-f GENESET_FILE`, `--geneset-file GENESET_FILE`: 
+  Look up GeneRIFs for a file containing a list of genes.
+
+- `-p PROCESS`, `--process PROCESS`: 
+  Find a biological process for the inputted gene set.
+
+- `-d CREATE_DRY_RUN`, `--create-dry-run CREATE_DRY_RUN`: 
+  Don't actually run the biological process finder, but save the gene summaries to a file.
+
+- `-a`, `--abstracts`: 
+  Also look up abstracts.
+
+- `-r LOAD_DRY_RUN`, `--load-dry-run LOAD_DRY_RUN`: 
+  Load the gene summaries from a file instead of running the LLM on them explicitly.
+
+- `--llm {gpt-3.5-turbo-1106,gpt-4-1106-preview}`: 
+  Specify the LLM to use.
+
+- `-m ARTICLE`, `--article ARTICLE`: 
+  Get the summary for a given PMID.
 
 ## Development
 
