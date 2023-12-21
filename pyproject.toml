@@ -17,6 +17,7 @@ paper-qa = "*"
 pyarrow = "*" 
 biopython = "*"
 pandas = "*"
+sentence-transformers = "*"
 
 [tool.poetry.dev-dependencies]
 pytest = "^7.4.0"
