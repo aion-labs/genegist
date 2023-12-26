@@ -64,13 +64,20 @@ class GeneRIFS:
         return texts
 
 
-def gene2id(gene_name: str) -> int:
-    """Get the NCBI gene ID for the given gene name."""
+def set_ncbi_email() -> None:
+    """Set the NCBI email address."""
 
     if os.environ.get("NCBI_EMAIL"):
         Entrez.email = os.environ["NCBI_EMAIL"]
     else:
         raise ValueError("Please set the NCBI_EMAIL environment variable.")
+
+
+def gene2id(gene_name: str) -> int:
+    """Get the NCBI gene ID for the given gene name."""
+
+    set_ncbi_email()
+
     handle = Entrez.esearch(
         db="gene", term=f"{gene_name}[Gene Name] AND Homo sapiens[Organism]"
     )
@@ -89,10 +96,7 @@ def gene2id(gene_name: str) -> int:
 def id2gene(gene_id: int) -> str:
     """Get the gene name for the given NCBI gene ID."""
 
-    if os.environ.get("NCBI_EMAIL"):
-        Entrez.email = os.environ["NCBI_EMAIL"]
-    else:
-        raise ValueError("Please set the NCBI_EMAIL environment variable.")
+    set_ncbi_email()
 
     handle = Entrez.esummary(db="gene", id=str(gene_id))
     record = Entrez.read(handle)
@@ -117,10 +121,8 @@ def id2gene(gene_id: int) -> str:
 def get_gene_abstracts(gene_name: str, max_results: int = 100) -> str:
     """Get NCBI published abstractions for a given gene."""
 
-    if os.environ.get("NCBI_EMAIL"):
-        Entrez.email = os.environ["NCBI_EMAIL"]
-    else:
-        raise ValueError("Please set the NCBI_EMAIL environment variable.")
+    set_ncbi_email()
+
     search_term = f"{gene_name}[Gene Name] AND Homo sapiens[Organism]"
     search_handle = Entrez.esearch(db="pubmed", term=search_term, retmax=max_results)
     search_results = Entrez.read(search_handle)
@@ -142,10 +144,7 @@ def get_gene_abstracts(gene_name: str, max_results: int = 100) -> str:
 def get_abstract(pmid: str) -> str:
     """Get NCBI published abstract for a given PubMed ID."""
 
-    if os.environ.get("NCBI_EMAIL"):
-        Entrez.email = os.environ["NCBI_EMAIL"]
-    else:
-        raise ValueError("Please set the NCBI_EMAIL environment variable.")
+    set_ncbi_email()
 
     if pmid:
         fetch_handle = Entrez.efetch(
@@ -161,10 +160,7 @@ def get_abstract(pmid: str) -> str:
 def get_article(pmid: str) -> Optional[str]:
     """Get article for a given PMID, assuming it is open access."""
 
-    if os.environ.get("NCBI_EMAIL"):
-        Entrez.email = os.environ["NCBI_EMAIL"]
-    else:
-        raise ValueError("Please set the NCBI_EMAIL environment variable.")
+    set_ncbi_email()
 
     def parse_article_xml(xml_data: str) -> Optional[str]:
         try:
