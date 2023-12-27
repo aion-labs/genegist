@@ -340,7 +340,7 @@ class Embedding:
         self.index.init_index(max_elements=1000000, ef_construction=200, M=16)
         self.index.set_ef(50)
 
-        for i, gene in tqdm(
+        for gene in tqdm(
             self.generifs["Gene ID"].unique(), desc="Building index", unit=" gene"
         ):
             embedding = self.get_embedding(gene)
