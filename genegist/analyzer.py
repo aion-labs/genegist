@@ -310,7 +310,8 @@ class Analyzer:
 class Embedding:
     def __init__(self):
         self.embedding = SentenceTransformer("all-MiniLM-L6-v2")
-        self.generifs = GeneRIFS().get_generifs()
+        generifs = GeneRIFS().get_generifs()
+        self.generifs = generifs[generifs["#Tax ID"] == 9606]
 
     def get_embedding(self, gene: Union[str, int]) -> np.ndarray:
         """
