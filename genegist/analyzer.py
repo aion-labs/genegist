@@ -312,9 +312,19 @@ class Embedding:
         self.embedding = SentenceTransformer("all-MiniLM-L6-v2")
         self.generifs = GeneRIFS().get_generifs()
 
-    def get_embedding(self, gene: str) -> np.ndarray:
-        """Get the embedding for the given gene."""
-        gene = gene2id(gene)
+    def get_embedding(self, gene: Union[str, int]) -> np.ndarray:
+        """
+        Get the embedding for the given gene.
+
+        Args:
+            gene (Union[str, int]): The gene to be embedded by gene ID or gene name.
+
+        Returns:
+            np.ndarray: The embedding of the gene.
+        """
+        if isinstance(gene, str):
+            gene = gene2id(gene)
+
         texts = self.generifs[self.generifs["Gene ID"] == gene]["GeneRIF text"].tolist()
         if len(texts) == 0:
             return None
