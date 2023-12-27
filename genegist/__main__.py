@@ -54,7 +54,6 @@ def main():
         "-i",
         "--build-index",
         help="Build an embedding index for all the generifs",
-        action="store_true",
     )
 
     args = parser.parse_args()
@@ -113,4 +112,4 @@ def main():
 
     if args.build_index:
         embedding = Embedding()
-        embedding.build_index()
+        embedding.build_index(args.build_index)

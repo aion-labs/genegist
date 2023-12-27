@@ -334,8 +334,13 @@ class Embedding:
             return None
         return self.embedding.encode(texts)
 
-    def build_index(self) -> None:
-        """Build the vector space for all the GeneRIFs."""
+    def build_index(self, index_path: str) -> None:
+        """
+        Build the vector space for all the GeneRIFs.
+
+        Args:
+            index_path (str): The path to save the index.
+        """
 
         self.index.init_index(max_elements=1000000, ef_construction=200, M=16)
         self.index.set_ef(50)
@@ -346,4 +351,4 @@ class Embedding:
             embedding = self.get_embedding(gene)
             if embedding is not None:
                 self.index.add_items(embedding, [gene] * len(embedding))
-        self.index.save_index("index.tree")
+        self.index.save_index(index_path)
