@@ -5,8 +5,10 @@ from typing import Union, Dict, Iterable, Tuple
 
 from openai import OpenAI, RateLimitError
 import numpy as np
+import hnswlib
 from sentence_transformers import SentenceTransformer
 import tiktoken
+from tqdm import tqdm
 
 from genegist.data import (
     GeneRIFS,
@@ -312,6 +314,7 @@ class Embedding:
         self.embedding = SentenceTransformer("all-MiniLM-L6-v2")
         generifs = GeneRIFS().get_generifs()
         self.generifs = generifs[generifs["#Tax ID"] == 9606]
+        self.index = hnswlib.Index(space="cosine", dim=384)
 
     def get_embedding(self, gene: Union[str, int]) -> np.ndarray:
         """
@@ -330,3 +333,17 @@ class Embedding:
         if len(texts) == 0:
             return None
         return self.embedding.encode(texts)
+
+    def build_index(self) -> None:
+        """Build the vector space for all the GeneRIFs."""
+
+        self.index.init_index(max_elements=1000000, ef_construction=200, M=16)
+        self.index.set_ef(50)
+
+        for i, gene in tqdm(
+            self.generifs["Gene ID"].unique(), desc="Building index", unit=" gene"
+        ):
+            embedding = self.get_embedding(gene)
+            if embedding is not None:
+                self.index.add_items(embedding, [gene] * len(embedding))
+        self.index.save_index("index.tree")
