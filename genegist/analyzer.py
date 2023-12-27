@@ -345,10 +345,14 @@ class Embedding:
         self.index.init_index(max_elements=1000000, ef_construction=200, M=16)
         self.index.set_ef(50)
 
-        for gene in tqdm(
-            self.generifs["Gene ID"].unique(), desc="Building index", unit=" gene"
-        ):
-            embedding = self.get_embedding(gene)
-            if embedding is not None:
-                self.index.add_items(embedding, [gene] * len(embedding))
-        self.index.save_index(index_path)
+        try:
+            for gene in tqdm(
+                self.generifs["Gene ID"].unique(), desc="Building index", unit=" gene"
+            ):
+                embedding = self.get_embedding(gene)
+                if embedding is not None:
+                    self.index.add_items(embedding, [gene] * len(embedding))
+        except KeyboardInterrupt:
+            print("Stopping index creation early.")
+        finally:
+            self.index.save_index(index_path)
