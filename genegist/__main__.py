@@ -3,7 +3,7 @@ import pickle
 
 from tqdm import tqdm
 
-from genegist.analyzer import Analyzer
+from genegist.analyzer import Analyzer, Embedding
 from genegist.data import GeneRIFS
 
 
@@ -49,6 +49,12 @@ def main():
         "-y",
         "--synthetic-generifs",
         help="Create synthetic generifs and save them to a tab-delimited file",
+    )
+    parser.add_argument(
+        "-i",
+        "--build-index",
+        help="Build an embedding index for all the generifs",
+        action="store_true",
     )
 
     args = parser.parse_args()
@@ -104,3 +110,7 @@ def main():
     if args.article:
         analyzer = Analyzer(llm=args.llm)
         print(analyzer.summarize_article(args.article))
+
+    if args.build_index:
+        embedding = Embedding()
+        embedding.build_index()
