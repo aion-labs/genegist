@@ -71,6 +71,16 @@ poetry run genegist [options]
 - `-m ARTICLE`, `--article ARTICLE`: 
   Get the summary for a given PMID.
 
+- `-t`, `--tasks`: 
+  Run a given custom task. Currently only E3 ligase analysis is supported.
+
+- `-y`, `--synthetic-generifs`: 
+  Create synthetic generifs and save them to a tab-delimited file.
+
+- `-i`, `--build-index`:
+   Build an embedding index for all the generifs.
+
+
 ## Development
 
 ### Running Tests
