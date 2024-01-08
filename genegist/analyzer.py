@@ -59,12 +59,13 @@ class Analyzer:
 
         return result.choices[0].message.content.strip()
 
-    def summarize_article(self, pmid: str) -> str:
+    def summarize_article(self, pmid: str, custom_prompt: str = None) -> str:
         """
         Summarizes a given article.
 
         Args:
             pmid (str): The PubMed ID of the article to be summarized.
+            custom_prompt (str): A custom prompt to be used instead of the default prompt.
 
         Returns:
             str: A summary of the article.
@@ -76,7 +77,10 @@ class Analyzer:
 
         article = self.distill(article)
 
-        prompt = f"Summarize the following article:\n\n{article}"
+        if custom_prompt is not None:
+            prompt = custom_prompt + "\n\n" + article
+        else:
+            prompt = f"Summarize the following article:\n\n{article}"
 
         return self.call_llm(prompt, self.llm)
 
