@@ -11,7 +11,15 @@ GeneGist can also create Gene Reference Into Function (GeneRIFs) directly from s
 ## License
 Apache License
 
-## Installation
+### Installation
+
+To install GeneGist, ensure you have Python 3.10 or higher. It can be installed via pip:
+
+```bash
+pip install genegist
+```
+
+## Development 
 
 ### Installing Poetry
 Poetry is required to handle dependencies and package management. To install Poetry, run:
