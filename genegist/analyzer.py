@@ -5,10 +5,10 @@ from typing import Union, Dict, Iterable, Tuple
 
 from openai import OpenAI, RateLimitError
 import numpy as np
-import hnswlib
 from sentence_transformers import SentenceTransformer
 import tiktoken
 from tqdm import tqdm
+import vectorizedb
 
 from genegist.data import (
     GeneRIFS,
@@ -314,7 +314,6 @@ class Embedding:
         self.embedding = SentenceTransformer("all-MiniLM-L6-v2")
         generifs = GeneRIFS().get_generifs()
         self.generifs = generifs[generifs["#Tax ID"] == 9606]
-        self.index = hnswlib.Index(space="cosine", dim=384)
 
     def get_embedding(self, gene: Union[str, int]) -> np.ndarray:
         """
@@ -342,17 +341,28 @@ class Embedding:
             index_path (str): The path to save the index.
         """
 
-        self.index.init_index(max_elements=1000000, ef_construction=200, M=16)
-        self.index.set_ef(50)
+        db = vectorizedb.Database(index_path, dim=384, max_elements=9999999)
 
         try:
             for gene in tqdm(
                 self.generifs["Gene ID"].unique(), desc="Building index", unit=" gene"
             ):
-                embedding = self.get_embedding(gene)
-                if embedding is not None:
-                    self.index.add_items(embedding, [gene] * len(embedding))
+                texts = self.generifs[self.generifs["Gene ID"] == gene][
+                    "GeneRIF text"
+                ].tolist()
+                gene_name = id2gene(gene)
+
+                for idx, text in enumerate(texts, 1):
+                    embedding = self.embedding.encode(text)
+                    if embedding is not None:
+                        db[f"{gene}-gt-{idx}"] = (
+                            embedding,
+                            {
+                                "gene_id": int(gene),
+                                "gene_name": gene_name,
+                                "type": "ground_truth",
+                                "text": text,
+                            },
+                        )
         except KeyboardInterrupt:
             print("Stopping index creation early.")
-        finally:
-            self.index.save_index(index_path)
