@@ -6,6 +6,43 @@ from tqdm import tqdm
 from genegist.analyzer import Analyzer, Embedding
 from genegist.data import GeneRIFS
 
+custom_prompts = {
+    "e3-ligase": (
+        "Read the following text."
+        "Please include a JSON format of all E3 ligase-substrate pairs mentioned in the paper. "
+        "Each E3 ligase-substrate pair should be its own JSON object, with E3_ligase and substrate as the keys. "
+        "Make sure to include the E3 ligase and substrate names in a JSON format, not in prose. "
+        "Only include JSON no commentary or markdown. Please be accurate with E3 ligase and substrate names. "
+        "Only include protein IDs. "
+        "The text is as follows:"
+    ),
+}
+
+
+def remove_markdown_formatting(text: str):
+    """
+    Removes Markdown formatting from the provided text.
+    Specifically, it removes lines that start and end with triple backticks ```.
+
+    Args:
+        text (str): The text to remove Markdown formatting from
+
+    Returns:
+        str: The text with Markdown formatting removed
+    """
+    # Split the text into lines
+    lines = text.split("\n")
+
+    # Filter out lines that start and end with triple backticks
+    filtered_lines = [
+        line
+        for line in lines
+        if not line.startswith("```") and not line.endswith("```")
+    ]
+
+    # Join the lines back into a single string
+    return "\n".join(filtered_lines)
+
 
 def main():
     parser = ArgumentParser()
@@ -44,6 +81,12 @@ def main():
         "-m",
         "--article",
         help="Get the summary for a given PMID",
+    )
+    parser.add_argument(
+        "-t",
+        "--tasks",
+        choices=["e3-ligase"],
+        help="Run a given task",
     )
     parser.add_argument(
         "-y",
@@ -105,6 +148,14 @@ def main():
     if args.geneset_file:
         generifs = GeneRIFS()
         print(generifs.get_texts_by_gene_set_list(args.geneset_file))
+
+    if args.tasks:
+        analyzer = Analyzer(llm=args.llm)
+        result = analyzer.summarize_article(
+            args.article, custom_prompt=custom_prompts[args.tasks]
+        )
+        print(remove_markdown_formatting(result))
+        return
 
     if args.article:
         analyzer = Analyzer(llm=args.llm)
