@@ -1,6 +1,12 @@
 # 👓 GeneGist
 
-"genegist" is a Python package designed for generating summaries of groups of genes. This tool leverages LLMs to analyze gene-related data effectively.
+Researchers often face challenges in deciphering the complex interactions and functions of systems of genes. GeneGist addresses this problem by providing detailed summaries and insights into gene behaviors, interactions, and their roles in biological processes. 
+
+This complexity arises from the vast array of gene interactions, regulatory mechanisms, and the multifaceted roles genes play in biological processes. GeneGist generates in-depth summaries and insights into gene behaviors and interactions, as well as their roles in biological pathways and systems.
+
+GeneGist first scrapes and analyzes academic articles. GeneGist leverages the most advanced Large Language Models (LLMs) available to analyze this information. Using this distilled knowledge it produces biological process summaries. 
+
+GeneGist can also create Gene Reference Into Function (GeneRIFs) directly from scientific literature. GeneRIFs are concise sentence-like annotations, typically written by a human, that describe the function of a gene. GeneGist can construct GeneRIFs using generative AI technology based on LLMs.
 
 ## License
 Apache License
