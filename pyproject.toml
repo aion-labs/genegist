@@ -5,6 +5,7 @@ description = "Create summararies of groups of genes."
 authors = ["JJ Ben-Joseph <jj@tensorspace.ai>", "Yair Benita <yair@aionlabs.com>"]
 license = "Apache"
 readme = "README.md"
+homepage = "https://github.com/aion-labs/genegist"
 
 [tool.poetry.dependencies]
 python = ">3.10"
