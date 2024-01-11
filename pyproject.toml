@@ -8,13 +8,8 @@ readme = "README.md"
 
 [tool.poetry.dependencies]
 python = ">3.10"
-langchain = "*"
-unstructured = "*"
 openai = "*"
-pdf2image = "*"
-chromadb = "*"
 tiktoken = "*"
-paper-qa = "*"
 pyarrow = "*" 
 biopython = "*"
 pandas = "*"
