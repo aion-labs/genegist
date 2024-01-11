@@ -345,7 +345,7 @@ class Embedding:
             index_path (str): The path to save the index.
         """
 
-        db = vectorizedb.Database(index_path, dim=384, max_elements=9999999)
+        db = vectorizedb.Database(index_path, dim=384)
 
         try:
             for gene in tqdm(
@@ -359,7 +359,7 @@ class Embedding:
                 for idx, text in enumerate(texts, 1):
                     embedding = self.embedding.encode(text)
                     if embedding is not None:
-                        db[f"{gene}-gt-{idx}"] = (
+                        db[f"{gene_name}-gt-{idx}"] = (
                             embedding,
                             {
                                 "gene_id": int(gene),
@@ -370,3 +370,4 @@ class Embedding:
                         )
         except KeyboardInterrupt:
             print("Stopping index creation early.")
+            db.close()
