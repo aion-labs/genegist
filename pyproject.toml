@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "genegist"
-version = "0.1.1"
+version = "0.1.2"
 description = "Create summararies of groups of genes."
 authors = ["JJ Ben-Joseph <jj@tensorspace.ai>", "Yair Benita <yair@aionlabs.com>"]
 license = "Apache"
