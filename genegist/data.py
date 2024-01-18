@@ -29,11 +29,11 @@ class GeneRIFS:
             df = pd.read_parquet(cache)
         else:
 
-            def convert_to_int_or_list(value):
+            def convert_to_int_or_list(value: str) -> List[int]:
                 if "," in value:
                     return [int(i) for i in value.split(",")]
                 else:
-                    return int(value)
+                    return [int(value)]
 
             df = pd.read_csv(
                 url, compression="gzip", sep="\t", lineterminator="\n", dtype={2: str}
