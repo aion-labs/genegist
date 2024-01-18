@@ -149,10 +149,19 @@ def get_gene_abstracts(gene_name: str, max_results: int = 100) -> str:
 
     set_ncbi_email()
 
-    search_term = f"{gene_name}[Gene Name] AND Homo sapiens[Organism]"
-    search_handle = Entrez.esearch(db="pubmed", term=search_term, retmax=max_results)
-    search_results = Entrez.read(search_handle)
-    search_handle.close()
+    try:
+        search_term = f"{gene_name}[Gene Name] AND Homo sapiens[Organism]"
+        search_handle = Entrez.esearch(
+            db="pubmed", term=search_term, retmax=max_results
+        )
+        search_results = Entrez.read(search_handle)
+        search_handle.close()
+    except urllib.error.HTTPError:
+        warnings.warn(
+            "HTTP request failed for Entrez API method get_gene_abstracts. Trying again in 5 seconds."
+        )
+        sleep(5)
+        return get_gene_abstracts(gene_name, max_results)
 
     id_list = search_results["IdList"]
 
@@ -173,11 +182,18 @@ def get_abstract(pmid: str) -> str:
     set_ncbi_email()
 
     if pmid:
-        fetch_handle = Entrez.efetch(
-            db="pubmed", id=pmid, rettype="abstract", retmode="text"
-        )
-        abstract = fetch_handle.read()
-        fetch_handle.close()
+        try:
+            fetch_handle = Entrez.efetch(
+                db="pubmed", id=pmid, rettype="abstract", retmode="text"
+            )
+            abstract = fetch_handle.read()
+            fetch_handle.close()
+        except urllib.error.HTTPError:
+            warnings.warn(
+                "HTTP request failed for Entrez API method get_abstract. Trying again 5 seconds."
+            )
+            sleep(5)
+            return get_abstract(pmid)
         return abstract
     else:
         return "No PMID provided."
@@ -221,8 +237,12 @@ def get_article(pmid: str) -> Optional[str]:
         fetch_handle.close()
 
         return parse_article_xml(article_xml)
-    except Exception as e:
-        return f"An error occurred while fetching the article: {e}"
+    except urllib.error.HTTPError:
+        warnings.warn(
+            "HTTP request failed for Entrez API method get_article. Trying again 5 seconds."
+        )
+        sleep(5)
+        return get_article(pmid)
 
 
 def geneset2symbols(geneset: str) -> Sequence[str]:
