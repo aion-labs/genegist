@@ -12,16 +12,24 @@ import pandas as pd
 
 
 class GeneRIFS:
+    """
+    Represents GeneRIFs (Gene References Into Function) which are short, descriptive summaries of a
+    gene's function from the Gene database at NCBI.
+    """
+
     def __init__(self):
         """
-        GeneRIFs (Gene References Into Function) are short, descriptive summaries of a
-        gene's function from the Gene database at NCBI.
+        Initializes a new instance of the GeneRIFS class.
         """
 
         self.df = self.get_generifs()
 
     def get_generifs(self) -> pd.DataFrame:
-        """Get the GeneRIFs data."""
+        """Get the GeneRIFs data.
+
+        Returns:
+            pd.DataFrame: The GeneRIFs data as a pandas DataFrame.
+        """
 
         url = "https://ftp.ncbi.nlm.nih.gov/gene/GeneRIF/generifs_basic.gz"
         cache = Path(__file__).parent / "data" / "generifs_basic.parquet"
@@ -47,7 +55,14 @@ class GeneRIFS:
         return df
 
     def get_texts_by_gene(self, gene_name: str) -> Sequence[str]:
-        """Get all the texts for the given gene IDs."""
+        """Get all the texts for the given gene IDs.
+
+        Args:
+            gene_name (str): The name of the gene.
+
+        Returns:
+            Sequence[str]: A sequence of texts associated with the given gene IDs.
+        """
 
         if gene_name.isnumeric():
             gene_id = int(gene_name)
@@ -57,8 +72,15 @@ class GeneRIFS:
         return self.df[mask]["GeneRIF text"].tolist()
 
     def get_texts_by_gene_set(self, gene_set: str, add_abstracts: bool = False) -> dict:
-        """Get all the texts for the given gene set."""
+        """Get all the texts for the given gene set.
 
+        Args:
+            gene_set (str): The gene set for which to retrieve the texts.
+            add_abstracts (bool, optional): Whether to include abstracts in the retrieved texts. Defaults to False.
+
+        Returns:
+            dict: A dictionary containing the texts for each gene symbol in the gene set.
+        """
         gene_symbols = geneset2symbols(gene_set)
         texts = {}
         for gene_symbol in gene_symbols:
@@ -68,8 +90,16 @@ class GeneRIFS:
     def get_texts_by_gene_set_list(
         self, gene_set: list, add_abstracts: bool = False
     ) -> dict:
-        """Get all the texts for the given gene set."""
+        """
+        Get all the texts for the given gene set.
 
+        Args:
+            gene_set (list): A list of gene symbols.
+            add_abstracts (bool, optional): Whether to include abstracts in the texts. Defaults to False.
+
+        Returns:
+            dict: A dictionary where the keys are gene symbols and the values are the corresponding texts.
+        """
         texts = {}
         for gene_symbol in gene_set:
             texts[gene_symbol] = self.get_texts_by_gene(gene_symbol, add_abstracts)
@@ -86,7 +116,14 @@ def set_ncbi_email() -> None:
 
 
 def gene2id(gene_name: str) -> int:
-    """Get the NCBI gene ID for the given gene name."""
+    """Get the NCBI gene ID for the given gene name.
+
+    Args:
+        gene_name (str): The name of the gene.
+
+    Returns:
+        int: The NCBI gene ID for the given gene name.
+    """
 
     set_ncbi_email()
 
@@ -113,7 +150,14 @@ def gene2id(gene_name: str) -> int:
 
 
 def id2gene(gene_id: int) -> str:
-    """Get the gene name for the given NCBI gene ID."""
+    """Get the gene name for the given NCBI gene ID.
+
+    Args:
+        gene_id (int): The NCBI gene ID.
+
+    Returns:
+        str: The gene name associated with the given gene ID, or None if not found.
+    """
 
     set_ncbi_email()
 
@@ -145,7 +189,16 @@ def id2gene(gene_id: int) -> str:
 
 
 def get_gene_abstracts(gene_name: str, max_results: int = 100) -> str:
-    """Get NCBI published abstractions for a given gene."""
+    """
+    Get NCBI published abstracts for a given gene.
+
+    Args:
+        gene_name (str): The name of the gene.
+        max_results (int, optional): The maximum number of results to retrieve. Defaults to 100.
+
+    Returns:
+        str: The abstracts of the publications related to the gene.
+    """
 
     set_ncbi_email()
 
@@ -177,7 +230,14 @@ def get_gene_abstracts(gene_name: str, max_results: int = 100) -> str:
 
 
 def get_abstract(pmid: str) -> str:
-    """Get NCBI published abstract for a given PubMed ID."""
+    """Get NCBI published abstract for a given PubMed ID.
+
+    Args:
+        pmid (str): The PubMed ID of the article.
+
+    Returns:
+        str: The abstract of the article.
+    """
 
     set_ncbi_email()
 
@@ -200,7 +260,14 @@ def get_abstract(pmid: str) -> str:
 
 
 def get_article(pmid: str) -> Optional[str]:
-    """Get article for a given PMID, assuming it is open access."""
+    """Get article for a given PMID, assuming it is open access.
+
+    Args:
+        pmid (str): The PMID (PubMed ID) of the article.
+
+    Returns:
+        Optional[str]: The article text if found, None otherwise.
+    """
 
     set_ncbi_email()
 
@@ -246,8 +313,14 @@ def get_article(pmid: str) -> Optional[str]:
 
 
 def geneset2symbols(geneset: str) -> Sequence[str]:
-    """Get the gene symbols for the given geneset."""
+    """Get the gene symbols for the given geneset.
 
+    Args:
+        geneset (str): The name of the geneset.
+
+    Returns:
+        Sequence[str]: A sequence of gene symbols.
+    """
     hallmarks_path = Path(__file__).parent / "data" / "h.all.v2023.2.Hs.json.txt"
     if not hallmarks_path.exists():
         raise ValueError(
