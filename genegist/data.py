@@ -2,7 +2,7 @@ import json
 import os
 from pathlib import Path
 from time import sleep
-from typing import Sequence, Optional
+from typing import Sequence, Optional, List
 import urllib.error
 import warnings
 import xml.etree.ElementTree as ET
@@ -28,10 +28,19 @@ class GeneRIFS:
         if cache.exists():
             df = pd.read_parquet(cache)
         else:
-            df = pd.read_csv(url, compression="gzip", sep="\t", lineterminator="\n")
 
-            # Ensure that the 'PubMed ID (PMID) list' column is treated as a string
-            df["PubMed ID (PMID) list"] = df["PubMed ID (PMID) list"].astype(str)
+            def convert_to_int_or_list(value: str) -> List[int]:
+                if "," in value:
+                    return [int(i) for i in value.split(",")]
+                else:
+                    return [int(value)]
+
+            df = pd.read_csv(
+                url, compression="gzip", sep="\t", lineterminator="\n", dtype={2: str}
+            )
+            df["PubMed ID (PMID) list"] = df["PubMed ID (PMID) list"].apply(
+                convert_to_int_or_list
+            )
 
             cache.parent.mkdir(exist_ok=True)
             df.to_parquet(cache)
