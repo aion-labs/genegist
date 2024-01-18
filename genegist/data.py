@@ -1,7 +1,10 @@
 import json
 import os
 from pathlib import Path
+from time import sleep
 from typing import Sequence, Optional
+import urllib.error
+import warnings
 import xml.etree.ElementTree as ET
 
 from Bio import Entrez
@@ -78,11 +81,18 @@ def gene2id(gene_name: str) -> int:
 
     set_ncbi_email()
 
-    handle = Entrez.esearch(
-        db="gene", term=f"{gene_name}[Gene Name] AND Homo sapiens[Organism]"
-    )
-    record = Entrez.read(handle)
-    handle.close()
+    try:
+        handle = Entrez.esearch(
+            db="gene", term=f"{gene_name}[Gene Name] AND Homo sapiens[Organism]"
+        )
+        record = Entrez.read(handle)
+        handle.close()
+    except urllib.error.HTTPError:
+        warnings.warn(
+            "HTTP request failed for Entrez API method gene2id. Trying again 5 seconds."
+        )
+        sleep(5)
+        return gene2id(gene_id)
 
     # Check if there are any results
     if not record["IdList"]:
@@ -98,9 +108,16 @@ def id2gene(gene_id: int) -> str:
 
     set_ncbi_email()
 
-    handle = Entrez.esummary(db="gene", id=str(gene_id))
-    record = Entrez.read(handle)
-    handle.close()
+    try:
+        handle = Entrez.esummary(db="gene", id=str(gene_id))
+        record = Entrez.read(handle)
+        handle.close()
+    except urllib.error.HTTPError:
+        warnings.warn(
+            "HTTP request failed for Entrez API method id2gene. Trying again 5 seconds."
+        )
+        sleep(5)
+        return id2gene(gene_id)
 
     if not record:
         return None
